@@ -15,7 +15,7 @@ async def find_by_username(username: str):
         "username": username
     })
 
-async def get_by_id(user_id: str):
+async def find_by_id(user_id: str):
     return await collection.find_one({
         "_id": user_id
     })

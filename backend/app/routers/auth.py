@@ -1,15 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
-from app.schemas.user_schema import UserCreate, Token, UserLogin
+from app.schemas.user_schema import UserCreate, Token
 from app.services.auth_service import register_user, login_user
-
 
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
-
 
 
 @router.post("/register")
@@ -21,8 +20,6 @@ async def register(user: UserCreate):
         password=user.password,
     )
 
-    print("Created User:", created_user)  # Debugging line
-
     return {
         "message": "User created successfully",
         "user_id": str(created_user["_id"]),
@@ -30,15 +27,14 @@ async def register(user: UserCreate):
 
 
 @router.post("/login", response_model=Token)
-async def login(user: UserLogin):
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
 
     access_token = await login_user(
-        email=user.email,
-        password=user.password,
+        email=form_data.username,
+        password=form_data.password,
     )
-
-    print("Access Token:", access_token)  # Debugging line
-    print("User Email:", user.email)  # Debugging line
 
     return {
         "access_token": access_token,
