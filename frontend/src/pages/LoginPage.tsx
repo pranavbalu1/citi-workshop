@@ -22,7 +22,7 @@ export function LoginPage() {
     console.log("Access token stored" + response.access_token);
 
     console.log("Logged in successfully");
-    navigate("/auth-details"); // Change to page after login/register
+    navigate("/health-details"); // Change to page after login/register
   };
 
   const handleRegister = async ({
@@ -51,7 +51,7 @@ export function LoginPage() {
     localStorage.setItem("access_token", loginResponse.access_token);
     console.log("Access token stored: " + loginResponse.access_token);
     console.log("Logged in after registration");
-    navigate("/auth-details"); // Change to page after login/register
+    navigate("/health-details"); // Change to page after login/register
   };
 
   return (

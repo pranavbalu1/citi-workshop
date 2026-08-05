@@ -1,16 +1,12 @@
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
+from app.routers.health import router as health_router
+from app.core.dependencies import Depends
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
-app = FastAPI(
-    title="Backend API",
-    description="FastAPI backend",
-    version="1.0.0",
-)
 
 app = FastAPI()
 
@@ -25,8 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
-
 
 @app.get("/")
 async def root():
@@ -35,6 +29,14 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+
+
+app.include_router(
+    health_router,
+    prefix="/api",
+)
 
 
 app.include_router(

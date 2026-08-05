@@ -19,7 +19,7 @@ export interface RegisterResponse {
   user_id: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function login(
   credentials: LoginCredentials,
@@ -29,7 +29,7 @@ export async function login(
   body.append("username", credentials.email);
   body.append("password", credentials.password);
 
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -49,7 +49,7 @@ export async function login(
 export async function register(
   credentials: RegisterCredentials,
 ): Promise<RegisterResponse> {
-  const response = await fetch(`${API_URL}/auth/register`, {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
