@@ -8,9 +8,3 @@ __pycache__/
 
 # Environment variables
 .env
-
-#Frontend
-node_modules/
-dist/
-build/
-
