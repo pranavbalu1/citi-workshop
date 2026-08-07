@@ -14,3 +14,7 @@ node_modules/
 dist/
 build/
 
+
+
+backend/lambda-package/
+backend/backend-lambda.zip

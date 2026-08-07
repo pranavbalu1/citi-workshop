@@ -1,3 +1,7 @@
+import json
+import os
+
+import boto3
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,7 +20,20 @@ class Settings(BaseSettings):
     )
 
 
+def load_lambda_secrets():
+    client = boto3.client(
+        "secretsmanager",
+        region_name="us-east-2",
+    )
+
+    response = client.get_secret_value(
+        SecretId="citi-workshop/backend",
+    )
+
+    return json.loads(response["SecretString"])
 
 
-settings = Settings()
-
+if os.getenv("AWS_LAMBDA_FUNCTION_NAME") and not os.getenv("LOCAL_DEV"):
+    settings = Settings(**load_lambda_secrets())
+else:
+    settings = Settings()

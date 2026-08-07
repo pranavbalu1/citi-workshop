@@ -1,28 +1,37 @@
-const API_URL = import.meta.env.VITE_API_URL || "";
+import { api } from "./client";
 
-interface JwtHealthResponse {
+export interface ApiHealthResponse {
   status: string;
-  authenticated: boolean;
-  user_id: string;
 }
 
-export async function jwtHealthCheck(): Promise<JwtHealthResponse> {
-  const token = localStorage.getItem("access_token");
+export interface MongoDBHealthResponse {
+  status: string;
+  error?: string;
+}
 
-  if (!token) {
-    throw new Error("No access token found");
-  }
+export interface JwtHealthResponse {
+  status: string;
+  current_user_id: string;
+  authenticated: boolean;
+}
 
-  const response = await fetch(`${API_URL}/api/health/jwt`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
+export function healthCheck(): Promise<ApiHealthResponse> {
+  return api.get<ApiHealthResponse>(
+    "/api/health",
+  );
+}
+
+export function mongodbHealthCheck(): Promise<MongoDBHealthResponse> {
+  return api.get<MongoDBHealthResponse>(
+    "/api/health/mongodb",
+  );
+}
+
+export function jwtHealthCheck(): Promise<JwtHealthResponse> {
+  return api.get<JwtHealthResponse>(
+    "/api/health/jwt",
+    {
+      authenticated: true,
     },
-  });
-
-  if (!response.ok) {
-    throw new Error(`JWT health check failed: ${response.status}`);
-  }
-
-  return response.json();
+  );
 }

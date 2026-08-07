@@ -1,3 +1,5 @@
+import { api } from "./client";
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -19,8 +21,6 @@ export interface RegisterResponse {
   user_id: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "";
-
 export async function login(
   credentials: LoginCredentials,
 ): Promise<LoginResponse> {
@@ -29,43 +29,27 @@ export async function login(
   body.append("username", credentials.email);
   body.append("password", credentials.password);
 
-  const response = await fetch(`${API_URL}/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+  return api.post<LoginResponse>(
+    "/api/auth/login",
     body,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => null);
-
-    throw new Error(error?.detail ?? "Invalid email or password.");
-  }
-
-  return response.json();
+    {
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded",
+      },
+    },
+  );
 }
 
 export async function register(
   credentials: RegisterCredentials,
 ): Promise<RegisterResponse> {
-  const response = await fetch(`${API_URL}/api/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  return api.post<RegisterResponse>(
+    "/api/auth/register",
+    {
       username: credentials.name,
       email: credentials.email,
       password: credentials.password,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => null);
-
-    throw new Error(error?.detail ?? "Registration failed. Please try again.");
-  }
-
-  return response.json();
+    },
+  );
 }
