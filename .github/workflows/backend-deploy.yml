@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - production
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-deploy.yml"
+
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -77,7 +76,10 @@ jobs:
             --function-name "${{ env.LAMBDA_FUNCTION }}" \
             --region "${{ env.AWS_REGION }}"
 
-          echo "Deployment successful!"
+          echo "========================================"
+          echo "Backend deployment successful!"
+          echo "========================================"
           echo "Function: ${{ env.LAMBDA_FUNCTION }}"
           echo "Image tag: ${{ github.sha }}"
           echo "Region: ${{ env.AWS_REGION }}"
+          echo "========================================"
