@@ -30,7 +30,13 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::392038041040:role/citi-workshop-github-actions-role
+          role-session-name: GitHubActionsBackendDeployment
+
+      - name: Verify AWS identity
+        run: |
+          echo "AWS identity:"
+          aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -55,20 +61,23 @@ jobs:
       - name: Update Lambda
         run: |
           aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION }} \
-            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
-            --region ${{ env.AWS_REGION }}
+            --function-name "${{ env.LAMBDA_FUNCTION }}" \
+            --image-uri "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}" \
+            --region "${{ env.AWS_REGION }}"
 
       - name: Wait for Lambda deployment
         run: |
           aws lambda wait function-updated \
-            --function-name ${{ env.LAMBDA_FUNCTION }} \
-            --region ${{ env.AWS_REGION }}
+            --function-name "${{ env.LAMBDA_FUNCTION }}" \
+            --region "${{ env.AWS_REGION }}"
 
       - name: Verify Lambda
         run: |
           aws lambda get-function \
-            --function-name ${{ env.LAMBDA_FUNCTION }} \
-            --region ${{ env.AWS_REGION }}
+            --function-name "${{ env.LAMBDA_FUNCTION }}" \
+            --region "${{ env.AWS_REGION }}"
 
-          echo "Deployment successful."
+          echo "Deployment successful!"
+          echo "Function: ${{ env.LAMBDA_FUNCTION }}"
+          echo "Image tag: ${{ github.sha }}"
+          echo "Region: ${{ env.AWS_REGION }}"
