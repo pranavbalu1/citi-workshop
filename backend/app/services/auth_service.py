@@ -54,6 +54,8 @@ async def register_user(
             "username": username,
             "email": email,
             "password_hash": password_hash,
+            "role": "user",
+            "is_active": True,
         },
     )
 
@@ -84,6 +86,12 @@ async def login_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive",
         )
 
     print("AUTH_SERVICE: user found")
@@ -119,7 +127,8 @@ async def login_user(
 
     try:
         token = create_access_token(
-            str(user.id)
+            user_id=str(user.id),
+            role=user.role,
         )
     except Exception as e:
         print(

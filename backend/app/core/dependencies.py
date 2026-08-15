@@ -11,12 +11,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-async def get_current_user_id(
-    token: str = Depends(oauth2_scheme)
-) -> str:
-
-    print("TOKEN:", token)
-
+def decode_access_token(token: str) -> dict:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -26,7 +21,6 @@ async def get_current_user_id(
     )
 
     try:
-
         payload = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
@@ -35,15 +29,78 @@ async def get_current_user_id(
 
         print("PAYLOAD:", payload)
 
-        user_id = payload.get("sub")
-
-        print("USER ID:", user_id)
-
-        if user_id is None:
-            raise credentials_exception
-
-        return user_id
+        return payload
 
     except jwt.InvalidTokenError as e:
         print("JWT ERROR:", e)
         raise credentials_exception
+
+
+async def get_current_user_id(
+    token: str = Depends(oauth2_scheme)
+) -> str:
+
+    print("TOKEN:", token)
+
+    payload = decode_access_token(token)
+
+    user_id = payload.get("sub")
+
+    print("USER ID:", user_id)
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        )
+
+    return user_id
+
+
+async def get_current_user_role(
+    token: str = Depends(oauth2_scheme)
+) -> str:
+
+    print("ROLE CHECK: validating token")
+
+    payload = decode_access_token(token)
+
+    role = payload.get("role")
+
+    print("USER ROLE:", role)
+
+    if role is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User role missing from token",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        )
+
+    return role
+
+
+def require_role(required_role: str):
+
+    async def role_dependency(
+        role: str = Depends(get_current_user_role),
+    ) -> str:
+
+        print(
+            f"ROLE AUTHORIZATION: "
+            f"required={required_role}, actual={role}"
+        )
+
+        if role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+
+        return role
+
+    return role_dependency

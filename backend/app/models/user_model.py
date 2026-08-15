@@ -35,6 +35,18 @@ class User(Base):
         nullable=False,
     )
 
+    role = mapped_column(
+        String(20),
+        nullable=False,
+        default="user",
+        server_default="user",
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        default=True,
+        nullable=False,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

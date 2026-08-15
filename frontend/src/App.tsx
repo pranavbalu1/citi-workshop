@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { LoginPage } from "@/pages/LoginPage";
 import { HealthDetails } from "@/pages/HealthDetails";
+import { AdminDashboard } from "@/pages/AdminDashboard";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/health-details" element={<HealthDetails />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Route>
 
       {/* Unknown routes */}

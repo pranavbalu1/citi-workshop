@@ -1,9 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user_id
+from app.core.dependencies import (
+    get_current_user_id,
+    require_role,
+)
+
 from app.database.postgres import get_db
-from app.services.users_service import get_user_by_id
+
+from app.services.users_service import (
+    get_user_by_id,
+    promote_user,
+)
 
 
 router = APIRouter(
@@ -34,4 +42,7 @@ async def get_me(
         "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
+        "role": current_user.role,
+        "is_active": current_user.is_active,
     }
+
