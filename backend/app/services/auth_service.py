@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
     create_access_token,
@@ -13,6 +14,7 @@ print("AUTH_SERVICE: module loading")
 
 
 async def register_user(
+    db: AsyncSession,
     username: str,
     email: str,
     password: str,
@@ -21,12 +23,17 @@ async def register_user(
 
     print("AUTH_SERVICE: checking if user already exists")
 
-    existing_user = await user_repository.find_by_email(email)
+    existing_user = await user_repository.find_by_email(
+        db,
+        email,
+    )
 
     print("AUTH_SERVICE: existing-user lookup finished")
 
     if existing_user:
-        print("AUTH_SERVICE: registration rejected - email exists")
+        print(
+            "AUTH_SERVICE: registration rejected - email exists"
+        )
 
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -41,11 +48,14 @@ async def register_user(
 
     print("AUTH_SERVICE: creating user")
 
-    user = await user_repository.create_user({
-        "username": username,
-        "email": email,
-        "password_hash": password_hash,
-    })
+    user = await user_repository.create_user(
+        db,
+        {
+            "username": username,
+            "email": email,
+            "password_hash": password_hash,
+        },
+    )
 
     print("AUTH_SERVICE: registration completed")
 
@@ -53,6 +63,7 @@ async def register_user(
 
 
 async def login_user(
+    db: AsyncSession,
     email: str,
     password: str,
 ):
@@ -60,7 +71,10 @@ async def login_user(
 
     print("AUTH_SERVICE: starting user lookup")
 
-    user = await user_repository.find_by_email(email)
+    user = await user_repository.find_by_email(
+        db,
+        email,
+    )
 
     print("AUTH_SERVICE: user lookup finished")
 
@@ -79,17 +93,17 @@ async def login_user(
     try:
         password_valid = verify_password(
             password,
-            user["password_hash"],
+            user.password_hash,
         )
     except Exception as e:
         print(
-            f"AUTH_SERVICE: password verification FAILED: "
+            "AUTH_SERVICE: password verification FAILED: "
             f"{type(e).__name__}: {e}"
         )
         raise
 
     print(
-        f"AUTH_SERVICE: password verification finished: "
+        "AUTH_SERVICE: password verification finished: "
         f"valid={password_valid}"
     )
 
@@ -105,11 +119,11 @@ async def login_user(
 
     try:
         token = create_access_token(
-            str(user["_id"])
+            str(user.id)
         )
     except Exception as e:
         print(
-            f"AUTH_SERVICE: token creation FAILED: "
+            "AUTH_SERVICE: token creation FAILED: "
             f"{type(e).__name__}: {e}"
         )
         raise

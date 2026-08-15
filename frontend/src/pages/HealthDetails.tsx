@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import {
   healthCheck,
   jwtHealthCheck,
-  mongodbHealthCheck,
+  postgresHealthCheck,
 } from "@/api/health";
 
 type HealthStatus = "checking" | "healthy" | "failed";
@@ -113,7 +113,7 @@ export function HealthDetails() {
     error: null,
   });
 
-  const [mongodb, setMongodb] = useState<HealthResult>({
+  const [postgres, setPostgres] = useState<HealthResult>({
     status: "checking",
     data: null,
     error: null,
@@ -132,7 +132,7 @@ export function HealthDetails() {
       error: null,
     });
 
-    setMongodb({
+    setPostgres({
       status: "checking",
       data: null,
       error: null,
@@ -144,10 +144,10 @@ export function HealthDetails() {
       error: null,
     });
 
-    const [backendResult, mongodbResult, jwtResult] =
+    const [backendResult, postgresResult, jwtResult] =
       await Promise.allSettled([
         healthCheck(),
-        mongodbHealthCheck(),
+        postgresHealthCheck(),
         jwtHealthCheck(),
       ]);
 
@@ -168,25 +168,27 @@ export function HealthDetails() {
       });
     }
 
-    if (mongodbResult.status === "fulfilled") {
-      const data = mongodbResult.value as HealthResponse;
+    if (postgresResult.status === "fulfilled") {
+      const data = postgresResult.value as HealthResponse;
 
-      setMongodb({
-        status: data.status === "healthy" ? "healthy" : "failed",
+      setPostgres({
+        status: data.status === "healthy"
+          ? "healthy"
+          : "failed",
         data,
         error:
           data.status === "healthy"
             ? null
-            : data.error ?? "MongoDB is unhealthy.",
+            : data.error ?? "PostgreSQL is unhealthy.",
       });
     } else {
-      setMongodb({
+      setPostgres({
         status: "failed",
         data: null,
         error:
-          mongodbResult.reason instanceof Error
-            ? mongodbResult.reason.message
-            : "MongoDB health check failed.",
+          postgresResult.reason instanceof Error
+            ? postgresResult.reason.message
+            : "PostgreSQL health check failed.",
       });
     }
 
@@ -254,7 +256,7 @@ export function HealthDetails() {
 
   const allHealthy =
     backend.status === "healthy" &&
-    mongodb.status === "healthy" &&
+    postgres.status === "healthy" &&
     jwt.status === "healthy";
 
   if (!token || !payload) {
@@ -293,7 +295,7 @@ export function HealthDetails() {
               onClick={() => void runHealthChecks()}
               disabled={
                 backend.status === "checking" ||
-                mongodb.status === "checking" ||
+                postgres.status === "checking" ||
                 jwt.status === "checking"
               }
               className="gap-2"
@@ -385,38 +387,38 @@ export function HealthDetails() {
             )}
           </div>
 
-          {/* MongoDB */}
+          {/* PostgreSQL / Neon */}
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-start justify-between">
               <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
                 <Database className="size-5 text-primary" />
               </div>
 
-              <StatusBadge status={mongodb.status} />
+              <StatusBadge status={postgres.status} />
             </div>
 
             <h3 className="mt-5 text-lg font-semibold">
-              MongoDB
+              PostgreSQL
             </h3>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Database connectivity
+              Neon database connectivity
             </p>
 
-            {mongodb.error && (
+            {postgres.error && (
               <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                {mongodb.error}
+                {postgres.error}
               </div>
             )}
 
-            {mongodb.data && (
+            {postgres.data && (
               <div className="mt-4 rounded-lg bg-muted/50 p-3">
                 <p className="text-xs text-muted-foreground">
                   Response
                 </p>
 
                 <p className="mt-1 font-mono text-sm">
-                  {mongodb.data.status}
+                  {postgres.data.status}
                 </p>
               </div>
             )}
