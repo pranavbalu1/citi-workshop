@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.routers.admin import router as admin_router
 from mangum import Mangum
 
 from app.routers.auth import router as auth_router
@@ -54,6 +55,10 @@ app.include_router(
     prefix="/api",
 )
 
+app.include_router(
+    admin_router,
+    prefix="/api",
+)
 
 print("MAIN: routers registered")
 

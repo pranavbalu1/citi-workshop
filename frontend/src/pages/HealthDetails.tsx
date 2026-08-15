@@ -12,11 +12,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  healthCheck,
-  jwtHealthCheck,
-  mongodbHealthCheck,
-} from "@/api/health";
+import { healthCheck, jwtHealthCheck, postgresHealthCheck } from "@/api/health";
 
 type HealthStatus = "checking" | "healthy" | "failed";
 
@@ -49,9 +45,7 @@ function decodeJwt(token: string): JwtPayload {
 
   const payload = parts[1];
 
-  const base64 = payload
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
 
   const paddedBase64 = base64.padEnd(
     base64.length + ((4 - (base64.length % 4)) % 4),
@@ -69,11 +63,7 @@ function formatTimestamp(timestamp?: number) {
   return new Date(timestamp * 1000).toLocaleString();
 }
 
-function StatusBadge({
-  status,
-}: {
-  status: HealthStatus;
-}) {
+function StatusBadge({ status }: { status: HealthStatus }) {
   if (status === "checking") {
     return (
       <div className="flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-sm font-semibold text-muted-foreground">
@@ -113,7 +103,7 @@ export function HealthDetails() {
     error: null,
   });
 
-  const [mongodb, setMongodb] = useState<HealthResult>({
+  const [postgres, setPostgres] = useState<HealthResult>({
     status: "checking",
     data: null,
     error: null,
@@ -132,7 +122,7 @@ export function HealthDetails() {
       error: null,
     });
 
-    setMongodb({
+    setPostgres({
       status: "checking",
       data: null,
       error: null,
@@ -144,12 +134,9 @@ export function HealthDetails() {
       error: null,
     });
 
-    const [backendResult, mongodbResult, jwtResult] =
-      await Promise.allSettled([
-        healthCheck(),
-        mongodbHealthCheck(),
-        jwtHealthCheck(),
-      ]);
+    const [backendResult, postgresResult, jwtResult] = await Promise.allSettled(
+      [healthCheck(), postgresHealthCheck(), jwtHealthCheck()],
+    );
 
     if (backendResult.status === "fulfilled") {
       setBackend({
@@ -168,25 +155,25 @@ export function HealthDetails() {
       });
     }
 
-    if (mongodbResult.status === "fulfilled") {
-      const data = mongodbResult.value as HealthResponse;
+    if (postgresResult.status === "fulfilled") {
+      const data = postgresResult.value as HealthResponse;
 
-      setMongodb({
+      setPostgres({
         status: data.status === "healthy" ? "healthy" : "failed",
         data,
         error:
           data.status === "healthy"
             ? null
-            : data.error ?? "MongoDB is unhealthy.",
+            : (data.error ?? "PostgreSQL is unhealthy."),
       });
     } else {
-      setMongodb({
+      setPostgres({
         status: "failed",
         data: null,
         error:
-          mongodbResult.reason instanceof Error
-            ? mongodbResult.reason.message
-            : "MongoDB health check failed.",
+          postgresResult.reason instanceof Error
+            ? postgresResult.reason.message
+            : "PostgreSQL health check failed.",
       });
     }
 
@@ -254,7 +241,7 @@ export function HealthDetails() {
 
   const allHealthy =
     backend.status === "healthy" &&
-    mongodb.status === "healthy" &&
+    postgres.status === "healthy" &&
     jwt.status === "healthy";
 
   if (!token || !payload) {
@@ -293,26 +280,20 @@ export function HealthDetails() {
               onClick={() => void runHealthChecks()}
               disabled={
                 backend.status === "checking" ||
-                mongodb.status === "checking" ||
+                postgres.status === "checking" ||
                 jwt.status === "checking"
               }
               className="gap-2"
             >
               <RefreshCw
                 className={`size-4 ${
-                  backend.status === "checking"
-                    ? "animate-spin"
-                    : ""
+                  backend.status === "checking" ? "animate-spin" : ""
                 }`}
               />
               Refresh
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={handleLogout} className="gap-2">
               <LogOut className="size-4" />
               Log Out
             </Button>
@@ -323,9 +304,7 @@ export function HealthDetails() {
         <section className="mt-6 rounded-xl border border-border bg-card p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">
-                System Status
-              </h2>
+              <h2 className="text-lg font-semibold">System Status</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 Current status of all backend health checks
@@ -358,9 +337,7 @@ export function HealthDetails() {
               <StatusBadge status={backend.status} />
             </div>
 
-            <h3 className="mt-5 text-lg font-semibold">
-              API Server
-            </h3>
+            <h3 className="mt-5 text-lg font-semibold">API Server</h3>
 
             <p className="mt-1 text-sm text-muted-foreground">
               FastAPI application
@@ -374,50 +351,40 @@ export function HealthDetails() {
 
             {backend.data && (
               <div className="mt-4 rounded-lg bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">
-                  Response
-                </p>
+                <p className="text-xs text-muted-foreground">Response</p>
 
-                <p className="mt-1 font-mono text-sm">
-                  {backend.data.status}
-                </p>
+                <p className="mt-1 font-mono text-sm">{backend.data.status}</p>
               </div>
             )}
           </div>
 
-          {/* MongoDB */}
+          {/* PostgreSQL / Neon */}
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-start justify-between">
               <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
                 <Database className="size-5 text-primary" />
               </div>
 
-              <StatusBadge status={mongodb.status} />
+              <StatusBadge status={postgres.status} />
             </div>
 
-            <h3 className="mt-5 text-lg font-semibold">
-              MongoDB
-            </h3>
+            <h3 className="mt-5 text-lg font-semibold">PostgreSQL</h3>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Database connectivity
+              Neon database connectivity
             </p>
 
-            {mongodb.error && (
+            {postgres.error && (
               <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                {mongodb.error}
+                {postgres.error}
               </div>
             )}
 
-            {mongodb.data && (
+            {postgres.data && (
               <div className="mt-4 rounded-lg bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">
-                  Response
-                </p>
+                <p className="text-xs text-muted-foreground">Response</p>
 
-                <p className="mt-1 font-mono text-sm">
-                  {mongodb.data.status}
-                </p>
+                <p className="mt-1 font-mono text-sm">{postgres.data.status}</p>
               </div>
             )}
           </div>
@@ -432,9 +399,7 @@ export function HealthDetails() {
               <StatusBadge status={jwt.status} />
             </div>
 
-            <h3 className="mt-5 text-lg font-semibold">
-              JWT Authentication
-            </h3>
+            <h3 className="mt-5 text-lg font-semibold">JWT Authentication</h3>
 
             <p className="mt-1 text-sm text-muted-foreground">
               Backend token verification
@@ -453,9 +418,7 @@ export function HealthDetails() {
                 </p>
 
                 <p className="mt-1 break-all font-mono text-sm">
-                  {jwt.data.current_user_id ??
-                    payload.sub ??
-                    "Unknown"}
+                  {jwt.data.current_user_id ?? payload.sub ?? "Unknown"}
                 </p>
               </div>
             )}
@@ -466,13 +429,11 @@ export function HealthDetails() {
         <section className="mt-6 rounded-xl border border-border bg-card p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">
-                Authentication Status
-              </h2>
+              <h2 className="text-lg font-semibold">Authentication Status</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
-                Your access token was decoded locally and verified
-                against the FastAPI backend.
+                Your access token was decoded locally and verified against the
+                FastAPI backend.
               </p>
             </div>
 
@@ -487,9 +448,7 @@ export function HealthDetails() {
                 </p>
 
                 <p className="mt-2 break-all font-mono text-sm">
-                  {jwt.data?.current_user_id ??
-                    payload.sub ??
-                    "N/A"}
+                  {jwt.data?.current_user_id ?? payload.sub ?? "N/A"}
                 </p>
               </div>
 
@@ -498,9 +457,7 @@ export function HealthDetails() {
                   Issued At
                 </p>
 
-                <p className="mt-2 text-sm">
-                  {formatTimestamp(payload.iat)}
-                </p>
+                <p className="mt-2 text-sm">{formatTimestamp(payload.iat)}</p>
               </div>
 
               <div className="rounded-lg border border-border bg-muted/40 p-4">
@@ -508,9 +465,7 @@ export function HealthDetails() {
                   Expires At
                 </p>
 
-                <p className="mt-2 text-sm">
-                  {formatTimestamp(payload.exp)}
-                </p>
+                <p className="mt-2 text-sm">{formatTimestamp(payload.exp)}</p>
               </div>
             </div>
           )}
@@ -518,8 +473,8 @@ export function HealthDetails() {
           {jwt.status === "failed" && (
             <div className="mt-5 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
               <p className="text-sm text-destructive">
-                The backend rejected your JWT. The token may be
-                expired, invalid, or incorrectly signed.
+                The backend rejected your JWT. The token may be expired,
+                invalid, or incorrectly signed.
               </p>
 
               <Button
@@ -536,9 +491,7 @@ export function HealthDetails() {
 
         {/* JWT Payload */}
         <section className="mt-6 rounded-xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold">
-            JWT Payload
-          </h2>
+          <h2 className="text-lg font-semibold">JWT Payload</h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
             Decoded payload from your access token
@@ -553,9 +506,7 @@ export function HealthDetails() {
         <section className="mt-6 rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold">
-                Access Token
-              </h2>
+              <h2 className="text-lg font-semibold">Access Token</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 JWT currently stored in localStorage

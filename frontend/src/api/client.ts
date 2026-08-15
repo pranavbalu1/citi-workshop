@@ -9,11 +9,7 @@ export class ApiRequestError extends Error {
   status: number;
   data: ApiError | null;
 
-  constructor(
-    message: string,
-    status: number,
-    data: ApiError | null = null,
-  ) {
+  constructor(message: string, status: number, data: ApiError | null = null) {
     super(message);
     this.name = "ApiRequestError";
     this.status = status;
@@ -45,25 +41,16 @@ async function request<T>(
     const token = localStorage.getItem("access_token");
 
     if (!token) {
-      throw new ApiRequestError(
-        "Authentication required.",
-        401,
-      );
+      throw new ApiRequestError("Authentication required.", 401);
     }
 
-    requestHeaders.set(
-      "Authorization",
-      `Bearer ${token}`,
-    );
+    requestHeaders.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(
-    `${API_URL}${path}`,
-    {
-      ...fetchOptions,
-      headers: requestHeaders,
-    },
-  );
+  const response = await fetch(`${API_URL}${path}`, {
+    ...fetchOptions,
+    headers: requestHeaders,
+  });
 
   const contentType = response.headers.get("content-type");
 
@@ -92,21 +79,14 @@ async function request<T>(
 }
 
 export const api = {
-  get<T>(
-    path: string,
-    options: RequestOptions = {},
-  ) {
+  get<T>(path: string, options: RequestOptions = {}) {
     return request<T>(path, {
       ...options,
       method: "GET",
     });
   },
 
-  post<T>(
-    path: string,
-    body?: unknown,
-    options: RequestOptions = {},
-  ) {
+  post<T>(path: string, body?: unknown, options: RequestOptions = {}) {
     return request<T>(path, {
       ...options,
       method: "POST",
@@ -119,11 +99,7 @@ export const api = {
     });
   },
 
-  put<T>(
-    path: string,
-    body?: unknown,
-    options: RequestOptions = {},
-  ) {
+  put<T>(path: string, body?: unknown, options: RequestOptions = {}) {
     return request<T>(path, {
       ...options,
       method: "PUT",
@@ -136,11 +112,7 @@ export const api = {
     });
   },
 
-  patch<T>(
-    path: string,
-    body?: unknown,
-    options: RequestOptions = {},
-  ) {
+  patch<T>(path: string, body?: unknown, options: RequestOptions = {}) {
     return request<T>(path, {
       ...options,
       method: "PATCH",
@@ -153,10 +125,7 @@ export const api = {
     });
   },
 
-  delete<T>(
-    path: string,
-    options: RequestOptions = {},
-  ) {
+  delete<T>(path: string, options: RequestOptions = {}) {
     return request<T>(path, {
       ...options,
       method: "DELETE",

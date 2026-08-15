@@ -29,27 +29,19 @@ export async function login(
   body.append("username", credentials.email);
   body.append("password", credentials.password);
 
-  return api.post<LoginResponse>(
-    "/api/auth/login",
-    body,
-    {
-      headers: {
-        "Content-Type":
-          "application/x-www-form-urlencoded",
-      },
+  return api.post<LoginResponse>("/api/auth/login", body, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-  );
+  });
 }
 
 export async function register(
   credentials: RegisterCredentials,
 ): Promise<RegisterResponse> {
-  return api.post<RegisterResponse>(
-    "/api/auth/register",
-    {
-      username: credentials.name,
-      email: credentials.email,
-      password: credentials.password,
-    },
-  );
+  return api.post<RegisterResponse>("/api/auth/register", {
+    username: credentials.name,
+    email: credentials.email,
+    password: credentials.password,
+  });
 }
