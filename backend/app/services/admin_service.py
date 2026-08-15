@@ -1,19 +1,20 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories import user_repository
+from app.repositories.user_repository import find_all, find_by_id, delete_user, update_user_role, update_user_status
 
 
 async def get_all_users(
     db: AsyncSession,
 ):
-    return await user_repository.find_all(db)
+    return await find_all(db)
 
 
 async def get_user(
     db: AsyncSession,
     user_id: str,
 ):
-    return await user_repository.find_by_id(
+    return await find_by_id(
         db,
         user_id,
     )
@@ -23,7 +24,7 @@ async def delete_user(
     db: AsyncSession,
     user_id: str,
 ):
-    return await user_repository.delete_user(
+    return await delete_user(
         db,
         user_id,
     )
@@ -33,7 +34,7 @@ async def update_user_role(
     user_id: str,
     role: str,
 ):
-    return await user_repository.update_user_role(
+    return await update_user_role(
         db,
         user_id,
         role,
@@ -45,7 +46,7 @@ async def update_user_status(
     user_id: str,
     is_active: bool,
 ):
-    return await user_repository.update_user_status(
+    return await update_user_status(
         db,
         user_id,
         is_active,

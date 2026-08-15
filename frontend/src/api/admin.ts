@@ -48,22 +48,22 @@ export async function deleteUser(userId: string): Promise<UserDeleteResponse> {
 
 export async function updateUserRole(
   userId: string,
-  role: string
+  role: string,
 ): Promise<UserRoleUpdateResponse> {
   return api.put<UserRoleUpdateResponse>(
     `/api/admin/users/${userId}/role`,
     { role },
-    { authenticated: true }
+    { authenticated: true },
   );
 }
 
 export async function updateUserStatus(
   userId: string,
-  isActive: boolean
+  isActive: boolean,
 ): Promise<UserStatusUpdateResponse> {
   return api.patch<UserStatusUpdateResponse>(
     `/api/admin/users/${userId}/status`,
     { is_active: isActive },
-    { authenticated: true }
+    { authenticated: true },
   );
 }

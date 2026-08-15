@@ -84,17 +84,11 @@ export function AdminDashboard() {
   /*
    * Role update
    */
-  const handleRoleChange = async (
-    userId: string,
-    newRole: string,
-  ) => {
+  const handleRoleChange = async (userId: string, newRole: string) => {
     setActionLoadingId(userId);
 
     try {
-      const updated = await updateUserRole(
-        userId,
-        newRole,
-      );
+      const updated = await updateUserRole(userId, newRole);
 
       setUsers((prev) =>
         prev.map((user) =>
@@ -107,11 +101,7 @@ export function AdminDashboard() {
         ),
       );
     } catch (err) {
-      alert(
-        err instanceof Error
-          ? err.message
-          : "Failed to update role.",
-      );
+      alert(err instanceof Error ? err.message : "Failed to update role.");
     } finally {
       setActionLoadingId(null);
     }
@@ -120,17 +110,11 @@ export function AdminDashboard() {
   /*
    * Status update
    */
-  const handleStatusToggle = async (
-    userId: string,
-    currentStatus: boolean,
-  ) => {
+  const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
     setActionLoadingId(userId);
 
     try {
-      const updated = await updateUserStatus(
-        userId,
-        !currentStatus,
-      );
+      const updated = await updateUserStatus(userId, !currentStatus);
 
       setUsers((prev) =>
         prev.map((user) =>
@@ -143,11 +127,7 @@ export function AdminDashboard() {
         ),
       );
     } catch (err) {
-      alert(
-        err instanceof Error
-          ? err.message
-          : "Failed to update status.",
-      );
+      alert(err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setActionLoadingId(null);
     }
@@ -156,10 +136,7 @@ export function AdminDashboard() {
   /*
    * Delete user
    */
-  const handleDeleteUser = async (
-    userId: string,
-    username: string,
-  ) => {
+  const handleDeleteUser = async (userId: string, username: string) => {
     const confirmed = window.confirm(
       `Are you sure you want to permanently delete "${username}"? This action cannot be undone.`,
     );
@@ -173,15 +150,9 @@ export function AdminDashboard() {
     try {
       await deleteUser(userId);
 
-      setUsers((prev) =>
-        prev.filter((user) => user.id !== userId),
-      );
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (err) {
-      alert(
-        err instanceof Error
-          ? err.message
-          : "Failed to delete user.",
-      );
+      alert(err instanceof Error ? err.message : "Failed to delete user.");
     } finally {
       setActionLoadingId(null);
     }
@@ -211,46 +182,29 @@ export function AdminDashboard() {
         user.email.toLowerCase().includes(query) ||
         user.id.toLowerCase().includes(query);
 
-      const matchesRole =
-        selectedRole === "all" ||
-        user.role === selectedRole;
+      const matchesRole = selectedRole === "all" || user.role === selectedRole;
 
       const matchesStatus =
         selectedStatus === "all" ||
         (selectedStatus === "active" && user.is_active) ||
         (selectedStatus === "inactive" && !user.is_active);
 
-      return (
-        matchesSearch &&
-        matchesRole &&
-        matchesStatus
-      );
+      return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [
-    users,
-    searchQuery,
-    selectedRole,
-    selectedStatus,
-  ]);
+  }, [users, searchQuery, selectedRole, selectedStatus]);
 
   /*
    * Pagination
    */
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredUsers.length / USERS_PER_PAGE,
-    ),
+    Math.ceil(filteredUsers.length / USERS_PER_PAGE),
   );
 
   const paginatedUsers = useMemo(() => {
-    const start =
-      (currentPage - 1) * USERS_PER_PAGE;
+    const start = (currentPage - 1) * USERS_PER_PAGE;
 
-    return filteredUsers.slice(
-      start,
-      start + USERS_PER_PAGE,
-    );
+    return filteredUsers.slice(start, start + USERS_PER_PAGE);
   }, [filteredUsers, currentPage]);
 
   /*
@@ -267,28 +221,17 @@ export function AdminDashboard() {
    */
   const totalUsers = users.length;
 
-  const activeUsers = users.filter(
-    (user) => user.is_active,
-  ).length;
+  const activeUsers = users.filter((user) => user.is_active).length;
 
-  const inactiveUsers =
-    totalUsers - activeUsers;
+  const inactiveUsers = totalUsers - activeUsers;
 
-  const adminUsers = users.filter(
-    (user) => user.role === "admin",
-  ).length;
+  const adminUsers = users.filter((user) => user.role === "admin").length;
 
   const activePercentage =
-    totalUsers > 0
-      ? Math.round(
-          (activeUsers / totalUsers) * 100,
-        )
-      : 0;
+    totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
 
   const firstResult =
-    filteredUsers.length === 0
-      ? 0
-      : (currentPage - 1) * USERS_PER_PAGE + 1;
+    filteredUsers.length === 0 ? 0 : (currentPage - 1) * USERS_PER_PAGE + 1;
 
   const lastResult = Math.min(
     currentPage * USERS_PER_PAGE,
@@ -298,7 +241,6 @@ export function AdminDashboard() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
         {/* =====================================================
             HEADER
         ===================================================== */}
@@ -329,18 +271,12 @@ export function AdminDashboard() {
               className="gap-2"
             >
               <RefreshCw
-                className={`size-4 ${
-                  loading ? "animate-spin" : ""
-                }`}
+                className={`size-4 ${loading ? "animate-spin" : ""}`}
               />
               Refresh
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={handleLogout} className="gap-2">
               <LogOut className="size-4" />
               Log Out
             </Button>
@@ -351,7 +287,6 @@ export function AdminDashboard() {
             METRICS
         ===================================================== */}
         <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
           {/* Total */}
           <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-start justify-between">
@@ -450,7 +385,6 @@ export function AdminDashboard() {
         ===================================================== */}
         <section className="mt-7 rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
             {/* Search */}
             <div className="relative w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -460,9 +394,7 @@ export function AdminDashboard() {
                 placeholder="Search by username, email, or ID..."
                 value={searchQuery}
                 onChange={(event) => {
-                  setSearchQuery(
-                    event.target.value,
-                  );
+                  setSearchQuery(event.target.value);
                   setCurrentPage(1);
                 }}
                 className="h-10 w-full rounded-xl border border-border bg-background py-2 pl-9 pr-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -471,47 +403,30 @@ export function AdminDashboard() {
 
             {/* Filters */}
             <div className="flex flex-col gap-2 sm:flex-row">
-
               <select
                 value={selectedRole}
                 onChange={(event) => {
-                  setSelectedRole(
-                    event.target.value,
-                  );
+                  setSelectedRole(event.target.value);
                   setCurrentPage(1);
                 }}
                 className="h-10 rounded-xl border border-border bg-background px-3 text-sm outline-none transition focus:border-primary"
               >
-                <option value="all">
-                  All Roles
-                </option>
-                <option value="admin">
-                  Administrators
-                </option>
-                <option value="user">
-                  Users
-                </option>
+                <option value="all">All Roles</option>
+                <option value="admin">Administrators</option>
+                <option value="user">Users</option>
               </select>
 
               <select
                 value={selectedStatus}
                 onChange={(event) => {
-                  setSelectedStatus(
-                    event.target.value,
-                  );
+                  setSelectedStatus(event.target.value);
                   setCurrentPage(1);
                 }}
                 className="h-10 rounded-xl border border-border bg-background px-3 text-sm outline-none transition focus:border-primary"
               >
-                <option value="all">
-                  All Statuses
-                </option>
-                <option value="active">
-                  Active
-                </option>
-                <option value="inactive">
-                  Inactive
-                </option>
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
@@ -538,13 +453,9 @@ export function AdminDashboard() {
             <ShieldAlert className="mt-0.5 size-4 shrink-0" />
 
             <div>
-              <p className="font-semibold">
-                Failed to load users
-              </p>
+              <p className="font-semibold">Failed to load users</p>
 
-              <p className="mt-1 opacity-90">
-                {error}
-              </p>
+              <p className="mt-1 opacity-90">{error}</p>
             </div>
           </div>
         )}
@@ -553,13 +464,10 @@ export function AdminDashboard() {
             USER TABLE
         ===================================================== */}
         <section className="mt-5 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
-
           {/* Table header */}
           <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
             <div>
-              <h2 className="text-sm font-bold">
-                User Directory
-              </h2>
+              <h2 className="text-sm font-bold">User Directory</h2>
 
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Manage application accounts and permissions.
@@ -574,40 +482,25 @@ export function AdminDashboard() {
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
-
               <thead className="border-b border-border/70 bg-muted/30">
                 <tr className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                  <th className="px-6 py-3.5">
-                    User
-                  </th>
+                  <th className="px-6 py-3.5">User</th>
 
-                  <th className="px-6 py-3.5">
-                    Role
-                  </th>
+                  <th className="px-6 py-3.5">Role</th>
 
-                  <th className="px-6 py-3.5">
-                    Status
-                  </th>
+                  <th className="px-6 py-3.5">Status</th>
 
-                  <th className="px-6 py-3.5">
-                    Account ID
-                  </th>
+                  <th className="px-6 py-3.5">Account ID</th>
 
-                  <th className="px-6 py-3.5 text-right">
-                    Actions
-                  </th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-border/60">
-
                 {/* Loading */}
                 {loading && (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="py-16 text-center"
-                    >
+                    <td colSpan={5} className="py-16 text-center">
                       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                         <RefreshCw className="size-4 animate-spin text-primary" />
                         Loading user directory...
@@ -617,50 +510,41 @@ export function AdminDashboard() {
                 )}
 
                 {/* Empty */}
-                {!loading &&
-                  paginatedUsers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="py-16 text-center"
-                      >
-                        <div className="flex flex-col items-center justify-center">
-                          <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
-                            <Search className="size-5 text-muted-foreground" />
-                          </div>
-
-                          <p className="mt-3 text-sm font-semibold">
-                            No users found
-                          </p>
-
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Try adjusting your search or filters.
-                          </p>
+                {!loading && paginatedUsers.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-16 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
+                          <Search className="size-5 text-muted-foreground" />
                         </div>
-                      </td>
-                    </tr>
-                  )}
+
+                        <p className="mt-3 text-sm font-semibold">
+                          No users found
+                        </p>
+
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Try adjusting your search or filters.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
 
                 {/* Users */}
                 {!loading &&
                   paginatedUsers.map((user) => {
-                    const isProcessing =
-                      actionLoadingId ===
-                      user.id;
+                    const isProcessing = actionLoadingId === user.id;
 
                     return (
                       <tr
                         key={user.id}
                         className="group transition-colors hover:bg-muted/20"
                       >
-
                         {/* User */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-
                             <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted text-xs font-bold uppercase">
-                              {user.username
-                                .slice(0, 2)}
+                              {user.username.slice(0, 2)}
                             </div>
 
                             <div className="min-w-0">
@@ -678,9 +562,7 @@ export function AdminDashboard() {
                         {/* Role */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-
-                            {user.role ===
-                            "admin" ? (
+                            {user.role === "admin" ? (
                               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-500">
                                 <ShieldCheck className="size-3.5" />
                                 Admin
@@ -724,9 +606,7 @@ export function AdminDashboard() {
                               <Button
                                 variant="outline"
                                 size="icon-xs"
-                                disabled={
-                                  isProcessing
-                                }
+                                disabled={isProcessing}
                                 className="opacity-70 transition-opacity group-hover:opacity-100"
                               >
                                 {isProcessing ? (
@@ -743,32 +623,18 @@ export function AdminDashboard() {
                                   {
                                     id: "make-user",
                                     label: "Make User",
-                                    icon: (
-                                      <UserRound className="size-4" />
-                                    ),
-                                    disabled:
-                                      user.role ===
-                                      "user",
+                                    icon: <UserRound className="size-4" />,
+                                    disabled: user.role === "user",
                                     onClick: () =>
-                                      void handleRoleChange(
-                                        user.id,
-                                        "user",
-                                      ),
+                                      void handleRoleChange(user.id, "user"),
                                   },
                                   {
                                     id: "make-admin",
                                     label: "Make Admin",
-                                    icon: (
-                                      <Shield className="size-4" />
-                                    ),
-                                    disabled:
-                                      user.role ===
-                                      "admin",
+                                    icon: <Shield className="size-4" />,
+                                    disabled: user.role === "admin",
                                     onClick: () =>
-                                      void handleRoleChange(
-                                        user.id,
-                                        "admin",
-                                      ),
+                                      void handleRoleChange(user.id, "admin"),
                                   },
                                 ],
                               },
@@ -777,10 +643,9 @@ export function AdminDashboard() {
                                 items: [
                                   {
                                     id: "toggle-status",
-                                    label:
-                                      user.is_active
-                                        ? "Deactivate User"
-                                        : "Activate User",
+                                    label: user.is_active
+                                      ? "Deactivate User"
+                                      : "Activate User",
                                     icon: user.is_active ? (
                                       <UserX className="size-4" />
                                     ) : (
@@ -799,9 +664,7 @@ export function AdminDashboard() {
                                   {
                                     id: "delete",
                                     label: "Delete User",
-                                    icon: (
-                                      <Trash2 className="size-4" />
-                                    ),
+                                    icon: <Trash2 className="size-4" />,
                                     destructive: true,
                                     onClick: () =>
                                       void handleDeleteUser(
@@ -824,35 +687,31 @@ export function AdminDashboard() {
           {/* ===================================================
               PAGINATION
           =================================================== */}
-          {!loading &&
-            filteredUsers.length > 0 && (
-              <div className="flex flex-col gap-4 border-t border-border/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          {!loading && filteredUsers.length > 0 && (
+            <div className="flex flex-col gap-4 border-t border-border/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                Showing{" "}
+                <span className="font-semibold text-foreground">
+                  {firstResult}
+                </span>
+                {" – "}
+                <span className="font-semibold text-foreground">
+                  {lastResult}
+                </span>
+                {" of "}
+                <span className="font-semibold text-foreground">
+                  {filteredUsers.length}
+                </span>{" "}
+                users
+              </p>
 
-                <p className="text-xs text-muted-foreground">
-                  Showing{" "}
-                  <span className="font-semibold text-foreground">
-                    {firstResult}
-                  </span>
-                  {" – "}
-                  <span className="font-semibold text-foreground">
-                    {lastResult}
-                  </span>
-                  {" of "}
-                  <span className="font-semibold text-foreground">
-                    {filteredUsers.length}
-                  </span>{" "}
-                  users
-                </p>
-
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={
-                    setCurrentPage
-                  }
-                />
-              </div>
-            )}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </section>
       </div>
     </main>

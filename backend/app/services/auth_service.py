@@ -7,7 +7,7 @@ from app.core.security import (
     verify_password,
 )
 
-from app.repositories import user_repository
+from app.repositories.user_repository import find_by_email, create_user
 
 
 print("AUTH_SERVICE: module loading")
@@ -23,7 +23,7 @@ async def register_user(
 
     print("AUTH_SERVICE: checking if user already exists")
 
-    existing_user = await user_repository.find_by_email(
+    existing_user = await find_by_email(
         db,
         email,
     )
@@ -48,7 +48,7 @@ async def register_user(
 
     print("AUTH_SERVICE: creating user")
 
-    user = await user_repository.create_user(
+    user = await create_user(
         db,
         {
             "username": username,
@@ -73,7 +73,7 @@ async def login_user(
 
     print("AUTH_SERVICE: starting user lookup")
 
-    user = await user_repository.find_by_email(
+    user = await find_by_email(
         db,
         email,
     )

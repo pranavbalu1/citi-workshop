@@ -16,22 +16,15 @@ export interface JwtHealthResponse {
 }
 
 export function healthCheck(): Promise<ApiHealthResponse> {
-  return api.get<ApiHealthResponse>(
-    "/api/health",
-  );
+  return api.get<ApiHealthResponse>("/api/health");
 }
 
 export function postgresHealthCheck(): Promise<PostgresHealthResponse> {
-  return api.get<PostgresHealthResponse>(
-    "/api/health/postgres",
-  );
+  return api.get<PostgresHealthResponse>("/api/health/postgres");
 }
 
 export function jwtHealthCheck(): Promise<JwtHealthResponse> {
-  return api.get<JwtHealthResponse>(
-    "/api/health/jwt",
-    {
-      authenticated: true,
-    },
-  );
+  return api.get<JwtHealthResponse>("/api/health/jwt", {
+    authenticated: true,
+  });
 }
